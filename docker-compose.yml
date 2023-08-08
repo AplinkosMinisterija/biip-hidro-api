@@ -1,0 +1,29 @@
+
+version: "3.3"
+
+services:
+  postgres:
+    image: postgis/postgis:14-master
+    networks:
+      - internal
+    ports:
+      - 4599:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: hidro
+      TZ: 'Etc/GMT'
+      PGTZ: 'Etc/GMT'
+
+  redis:
+    image: redis:latest
+    networks:
+      - internal
+    ports:
+      - 4598:6379
+
+networks:
+  internal:
+
+volumes:
+  data:
