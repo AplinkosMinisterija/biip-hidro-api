@@ -925,8 +925,9 @@ export default class SeedService extends moleculer.Service {
     );
   }
 
-  async started(): Promise<void> {
-    this.broker
+  @Action()
+  run() {
+    return this.broker
       .waitForServices(['hydroPowerPlants', 'events'])
       .then(async () => {
         await this.broker.call('seed.real', {}, { timeout: 120 * 1000 });
