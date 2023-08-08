@@ -9,6 +9,8 @@ const Cron = require('@r2d2bzh/moleculer-cron');
 
 const api = 'https://hidro.lt/api/elektrines/';
 
+const MAX_RETRIES = 5;
+
 export interface Event {
   id?: string;
   time: Date;
@@ -104,25 +106,41 @@ export default class eventsService extends moleculer.Service {
 
     await Promise.all(
       hydroPowerPlants.map(async (hydro) => {
-        const event = (
-          await (await fetch(`${api}${hydro.apiId}?format=json`)).json()
-        )?.['vandens_lygiai']?.[0];
+        let retryCount = 0;
+        let success = false;
 
-        if (event?.['laikas']) {
-          const hydroPowerPlants: Hydro[] = await ctx.call('events.findOne', {
-            query: {
-              hydroPowerPlant: { $eq: hydro.id },
-              time: { $eq: event?.['laikas'] },
-            },
-          });
+        while (retryCount < MAX_RETRIES && !success) {
+          try {
+            const response = await fetch(`${api}${hydro.apiId}?format=json`);
 
-          if (!hydroPowerPlants) {
-            this.createEntity(ctx, {
-              hydroPowerPlant: hydro.id,
-              time: event['laikas'],
-              upperBasin: event['aukstutinis_vandens_lygis'],
-              lowerBasin: event['zemutinis_vandens_lygis'],
-            });
+            if (!response.ok) {
+              throw new Error(`Fetch failed with status: ${response.status}`);
+            }
+
+            const event = (await response.json())?.['vandens_lygiai']?.[0];
+
+            if (event?.['laikas']) {
+              const existingEvent = await ctx.call('events.findOne', {
+                query: {
+                  hydroPowerPlant: { $eq: hydro.id },
+                  time: { $eq: event?.['laikas'] },
+                },
+              });
+
+              if (!existingEvent) {
+                this.createEntity(ctx, {
+                  hydroPowerPlant: hydro.id,
+                  time: event['laikas'],
+                  upperBasin: event['aukstutinis_vandens_lygis'],
+                  lowerBasin: event['zemutinis_vandens_lygis'],
+                });
+              }
+            }
+
+            success = true;
+          } catch (error) {
+            console.error(`Fetch error (retry ${retryCount + 1}):`, error);
+            retryCount++;
           }
         }
       })
