@@ -93,15 +93,13 @@ const getUETKHydros = async (ids: string[]) => {
 
   const hydros = UETKHydros.features
     .filter((i) => i.properties.kadastro_id)
-    .reduce((acc: { [key: string]: string | any }, item) => {
-      const { properties } = item;
-      const { kadastro_id } = properties;
-
-      return {
+    .reduce(
+      (acc: { [key: string]: string | any }, item) => ({
         ...acc,
-        [kadastro_id]: getHydroAdditionalInfo(item),
-      };
-    }, {});
+        [item.properties.kadastro_id]: getHydroAdditionalInfo(item),
+      }),
+      {}
+    );
 
   return hydros;
 };
