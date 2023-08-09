@@ -71,6 +71,19 @@ const getAllGisFullUrl = (ids: string[]) => {
   return `${gisApiUrl}?${param}`;
 };
 
+const getHydroAdditionalInfo = (item: UETKHydro) => {
+  const { properties, geometry } = item;
+  const { pavadinimas, he_galia } = properties;
+
+  const info = {
+    name: pavadinimas,
+    power: he_galia,
+    geom: geometry,
+  };
+
+  return info;
+};
+
 const getUETKHydros = async (ids: string[]) => {
   const gisFullUrl = getAllGisFullUrl(ids);
 
@@ -81,18 +94,12 @@ const getUETKHydros = async (ids: string[]) => {
   const hydros = UETKHydros.features
     .filter((i) => i.properties.kadastro_id)
     .reduce((acc: { [key: string]: string | any }, item) => {
-      const { properties, geometry } = item;
-      const { kadastro_id, pavadinimas, he_galia } = properties;
-
-      const info = {
-        name: pavadinimas,
-        power: he_galia,
-        geom: geometry,
-      };
+      const { properties } = item;
+      const { kadastro_id } = properties;
 
       return {
         ...acc,
-        [kadastro_id]: info,
+        [kadastro_id]: getHydroAdditionalInfo(item),
       };
     }, {});
 
@@ -226,12 +233,9 @@ export default class hydroPowerPlantsService extends moleculer.Service {
       res.json()
     );
 
-    const { pavadinimas, he_galia } = UETKHydro?.properties || {};
-
     return {
       ...hydroPowerPlant,
-      name: pavadinimas,
-      power: he_galia,
+      ...getHydroAdditionalInfo(UETKHydro),
     };
   }
 
