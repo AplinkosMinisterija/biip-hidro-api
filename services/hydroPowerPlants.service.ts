@@ -60,7 +60,7 @@ const setCommonParams = (param: URLSearchParams) => {
 const getOneGisFullUrl = (id: string) => {
   const param = new URLSearchParams();
   setCommonParams(param);
-  param.append('EXP_FILTER', `"kadastro_id" '${id}'`);
+  param.append('EXP_FILTER', `"kadastro_id"='${id}'`);
   return `${gisApiUrl}?${param}`;
 };
 
@@ -72,6 +72,8 @@ const getAllGisFullUrl = (ids: string[]) => {
 };
 
 const getHydroAdditionalInfo = (item: UETKHydro) => {
+  if (!item) return {};
+
   const { properties, geometry } = item;
   const { pavadinimas, he_galia } = properties;
 
@@ -227,13 +229,14 @@ export default class hydroPowerPlantsService extends moleculer.Service {
     });
 
     const gisFullUrl = getOneGisFullUrl(hydroPowerPlant.hydrostaticId);
-    const UETKHydro: UETKHydro = await fetch(gisFullUrl).then((res) =>
+
+    const UETKHydro: UETKHydrosResponse = await fetch(gisFullUrl).then((res) =>
       res.json()
     );
 
     return {
       ...hydroPowerPlant,
-      ...getHydroAdditionalInfo(UETKHydro),
+      ...getHydroAdditionalInfo(UETKHydro?.features?.[0]),
     };
   }
 
