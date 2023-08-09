@@ -74,18 +74,27 @@ const getAllGisFullUrl = (ids: string[]) => {
 const getUETKHydros = async (ids: string[]) => {
   const gisFullUrl = getAllGisFullUrl(ids);
 
-  const UETKHydros: UETKHydrosResponse = await (await fetch(gisFullUrl)).json();
-
-  const hydros = UETKHydros.features.reduce(
-    (obj: { [key: string]: UETKHydro }, item: UETKHydro) => {
-      if (item?.properties?.kadastro_id) {
-        obj[item?.properties?.kadastro_id] = item;
-      }
-
-      return obj;
-    },
-    {}
+  const UETKHydros: UETKHydrosResponse = await fetch(gisFullUrl).then((res) =>
+    res.json()
   );
+
+  const hydros = UETKHydros.features
+    .filter((i) => i.properties.kadastro_id)
+    .reduce((acc: { [key: string]: string | any }, item) => {
+      const { properties, geometry } = item;
+      const { kadastro_id, pavadinimas, he_galia } = properties;
+
+      const info = {
+        name: pavadinimas,
+        power: he_galia,
+        geom: geometry,
+      };
+
+      return {
+        ...acc,
+        [kadastro_id]: info,
+      };
+    }, {});
 
   return hydros;
 };
@@ -169,12 +178,9 @@ export default class hydroPowerPlantsService extends moleculer.Service {
 
     const mappedHydroPowerPlants = hydroPowerPlants.map((hydro) => {
       const UETKHydro = hydrosFromUETK?.[hydro.hydrostaticId];
-      const { pavadinimas, he_galia } = UETKHydro?.properties || {};
       return {
         ...hydro,
-        name: pavadinimas,
-        power: he_galia,
-        geom: UETKHydro?.geometry,
+        ...UETKHydro,
       };
     });
 
@@ -216,7 +222,9 @@ export default class hydroPowerPlantsService extends moleculer.Service {
     });
 
     const gisFullUrl = getOneGisFullUrl(hydroPowerPlant.hydrostaticId);
-    const UETKHydro: UETKHydro = await (await fetch(gisFullUrl)).json();
+    const UETKHydro: UETKHydro = await fetch(gisFullUrl).then((res) =>
+      res.json()
+    );
 
     const { pavadinimas, he_galia } = UETKHydro?.properties || {};
 
@@ -287,11 +295,10 @@ export default class hydroPowerPlantsService extends moleculer.Service {
      `);
 
     const hydroIds = rawHydros.rows.map((hydro) => `'${hydro.hydrostatic_id}'`);
-
     const hydrosFromUETK = await getUETKHydros(hydroIds);
 
     const mappedHydroPowerPlants = rawHydros.rows.map((hydro) => {
-      const hydroFromUETK = hydrosFromUETK[hydro.hydrostatic_id];
+      const UETKHydro = hydrosFromUETK[hydro.hydrostatic_id];
       const {
         upper_basin,
         upper_basin_max,
@@ -301,7 +308,7 @@ export default class hydroPowerPlantsService extends moleculer.Service {
         ...rest
       } = hydro;
 
-      const { pavadinimas } = hydroFromUETK.properties || {};
+      const { name } = UETKHydro;
 
       return {
         ...rest,
@@ -310,7 +317,7 @@ export default class hydroPowerPlantsService extends moleculer.Service {
         lowerBasinMin: lower_basin_min,
         lowerBasin: lower_basin,
         upperBasinMax: upper_basin_max,
-        name: pavadinimas,
+        name,
       };
     });
 
