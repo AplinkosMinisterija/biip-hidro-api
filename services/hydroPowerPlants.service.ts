@@ -6,7 +6,8 @@ import { COMMON_DEFAULT_SCOPES, COMMON_FIELDS, COMMON_SCOPES } from '../types';
 import { Event } from './events.service';
 
 const qgisServerHost = process.env.QGIS_SERVER_HOST || 'https://gis.biip.lt';
-const hydroApiUrl = `${qgisServerHost}/qgisserver/uetk_public?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=hidroelektrines&OUTPUTFORMAT=application/json&WITH_GEOMETRY=yes&EXP_FILTER=%22kadastro_id%22`;
+const gisApiUrl = `${qgisServerHost}/qgisserver/uetk_public`;
+
 export interface Hydro {
   id?: string;
   hydrostaticId: string;
@@ -18,10 +19,13 @@ export interface Hydro {
   lowerBasinMin: number;
 }
 
-export interface UETKHydros {
-  features: {
-    properties: { kadastro_id: string; pavadinimas: string };
-  }[];
+export interface UETKHydro {
+  properties: { kadastro_id: string; pavadinimas: string; he_galia: string };
+  geometry: any;
+}
+
+export interface UETKHydrosResponse {
+  features: UETKHydro[];
 }
 
 export interface RawPHydroProps {
@@ -45,25 +49,65 @@ export interface Range {
   };
 }
 
-const getUETKHydros = async (ids: any[]) => {
-  const hydrosFromUETK: UETKHydros = await (
-    await fetch(`${hydroApiUrl}%20IN%20(${ids.toString()})`)
-  ).json();
+const setCommonParams = (param: URLSearchParams) => {
+  param.append('SERVICE', 'WFS');
+  param.append('REQUEST', 'GetFeature');
+  param.append('TYPENAME', 'hidroelektrines');
+  param.append('OUTPUTFORMAT', 'application/json');
+  param.append('WITH_GEOMETRY', 'yes');
+};
 
-  const hash: any = {};
+const getOneGisFullUrl = (id: string) => {
+  const param = new URLSearchParams();
+  setCommonParams(param);
+  param.append('EXP_FILTER', `"kadastro_id"='${id}'`);
+  return `${gisApiUrl}?${param}`;
+};
 
-  hydrosFromUETK.features.forEach((item) => {
-    if (!item?.properties?.kadastro_id) return;
+const getAllGisFullUrl = (ids: string[]) => {
+  const param = new URLSearchParams();
+  setCommonParams(param);
+  param.append('EXP_FILTER', `"kadastro_id" IN (${ids.toString()})`);
+  return `${gisApiUrl}?${param}`;
+};
 
-    hash[item?.properties?.kadastro_id] = item;
-  });
+const getHydroAdditionalInfo = (item: UETKHydro) => {
+  if (!item) return {};
 
-  return hash;
+  const { properties, geometry } = item;
+  const { pavadinimas, he_galia } = properties;
+
+  const info = {
+    name: pavadinimas,
+    power: he_galia,
+    geom: geometry,
+  };
+
+  return info;
+};
+
+const getUETKHydros = async (ids: string[]) => {
+  const gisFullUrl = getAllGisFullUrl(ids);
+
+  const UETKHydros: UETKHydrosResponse = await fetch(gisFullUrl).then((res) =>
+    res.json()
+  );
+
+  const hydros = UETKHydros.features
+    .filter((i) => i.properties.kadastro_id)
+    .reduce(
+      (acc: { [key: string]: string | any }, item) => ({
+        ...acc,
+        [item.properties.kadastro_id]: getHydroAdditionalInfo(item),
+      }),
+      {}
+    );
+
+  return hydros;
 };
 
 @Service({
   name: 'hydroPowerPlants',
-
   mixins: [
     DbConnection({
       collection: 'hydroPowerPlants',
@@ -92,38 +136,22 @@ const getUETKHydros = async (ids: any[]) => {
         primaryKey: true,
         secure: true,
       },
-
       hydrostaticId: {
         type: 'string',
         required: true,
       },
-
-      name: {
-        type: 'string',
-        required: true,
-      },
-
       apiId: {
         type: 'string',
         columnType: 'integer',
       },
-
-      geom: {
-        type: 'object',
-        raw: true,
-        required: false,
-      },
-
       upperBasinMax: {
         type: 'string',
         columnType: 'integer',
       },
-
       upperBasinMin: {
         type: 'string',
         columnType: 'integer',
       },
-
       lowerBasinMin: {
         type: 'string',
         columnType: 'integer',
@@ -145,25 +173,21 @@ export default class hydroPowerPlantsService extends moleculer.Service {
   })
   async getHydroPowerPlants(ctx: Context<{ query: Range }>) {
     const { time } = ctx.params.query;
-
     const hydroPowerPlants: Hydro[] = await ctx.call('hydroPowerPlants.find', {
       sort: 'name',
     });
 
-    const hydrosFromUETK = await getUETKHydros(
-      hydroPowerPlants.map((hydro) => `'${hydro.hydrostaticId}'`)
+    const hydroIds = hydroPowerPlants.map(
+      (hydro) => `'${hydro.hydrostaticId}'`
     );
 
+    const hydrosFromUETK = await getUETKHydros(hydroIds);
+
     const mappedHydroPowerPlants = hydroPowerPlants.map((hydro) => {
-      const hydroFromUETK = hydrosFromUETK?.[hydro.hydrostaticId];
-
-      const { pavadinimas, he_galia } = hydroFromUETK?.properties || {};
-
+      const UETKHydro = hydrosFromUETK?.[hydro.hydrostaticId];
       return {
         ...hydro,
-        name: pavadinimas,
-        power: he_galia,
-        geom: hydroFromUETK?.geometry,
+        ...UETKHydro,
       };
     });
 
@@ -204,16 +228,15 @@ export default class hydroPowerPlantsService extends moleculer.Service {
       },
     });
 
-    const hydroFromUETK = (
-      await getUETKHydros([`'${hydroPowerPlant.hydrostaticId}'`])
-    )[hydroPowerPlant.hydrostaticId];
+    const gisFullUrl = getOneGisFullUrl(hydroPowerPlant.hydrostaticId);
 
-    const { pavadinimas, he_galia } = hydroFromUETK?.properties || {};
+    const UETKHydro: UETKHydrosResponse = await fetch(gisFullUrl).then((res) =>
+      res.json()
+    );
 
     return {
       ...hydroPowerPlant,
-      name: pavadinimas,
-      power: he_galia,
+      ...getHydroAdditionalInfo(UETKHydro?.features?.[0]),
     };
   }
 
@@ -276,12 +299,11 @@ export default class hydroPowerPlantsService extends moleculer.Service {
    ORDER BY name;
      `);
 
-    const hydrosFromUETK = await getUETKHydros(
-      rawHydros.rows.map((hydro) => `'${hydro.hydrostatic_id}'`)
-    );
+    const hydroIds = rawHydros.rows.map((hydro) => `'${hydro.hydrostatic_id}'`);
+    const hydrosFromUETK = await getUETKHydros(hydroIds);
 
     const mappedHydroPowerPlants = rawHydros.rows.map((hydro) => {
-      const hydroFromUETK = hydrosFromUETK[hydro.hydrostatic_id];
+      const UETKHydro = hydrosFromUETK[hydro.hydrostatic_id];
       const {
         upper_basin,
         upper_basin_max,
@@ -291,7 +313,7 @@ export default class hydroPowerPlantsService extends moleculer.Service {
         ...rest
       } = hydro;
 
-      const { pavadinimas } = hydroFromUETK.properties || {};
+      const { name } = UETKHydro;
 
       return {
         ...rest,
@@ -300,7 +322,7 @@ export default class hydroPowerPlantsService extends moleculer.Service {
         lowerBasinMin: lower_basin_min,
         lowerBasin: lower_basin,
         upperBasinMax: upper_basin_max,
-        name: pavadinimas,
+        name,
       };
     });
 
