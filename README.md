@@ -20,7 +20,7 @@ Ministerija.
 
 ## About the Project
 
-The BĮIP Hidro API is designed to provide information and functionalities related to activities of different water bodies located in Lithuania. It aims to support the management of water bodies.
+The BĮIP Hidro API is designed to provide information and functionalities related to hydro power plants located in Lithuania.
 
 ## Getting Started
 
