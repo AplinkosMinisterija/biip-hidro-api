@@ -12,7 +12,6 @@ Ministerija.
 - [Getting Started](#getting-started)
     - [Installation](#installation)
     - [Usage](#usage)
-- [OpenAPI](#openapi)
 - [Deployment](#deployment)
 - [Contributing](#contributing)
 - [License](#license)
