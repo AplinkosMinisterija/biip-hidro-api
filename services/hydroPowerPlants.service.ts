@@ -247,8 +247,11 @@ export default class hydroPowerPlantsService extends moleculer.Service {
     ctx: Context<{ query: { dateFrom: string; dateTo: string } }>
   ) {
     const adapter = await this.getAdapter(ctx);
-    const rawHydros: { rows: RawPHydroProps[] } = await adapter.client
-      .raw(`SELECT  
+    const rawHydros: any = await adapter.client.raw(`
+    SET TIME ZONE 'Europe/Vilnius';
+
+      
+      SELECT  
     hpp.id,
     hpp.hydrostatic_id,
     hpp."name",
@@ -259,7 +262,7 @@ export default class hydroPowerPlantsService extends moleculer.Service {
      SELECT COUNT(*)
      FROM events e
      WHERE e.hydro_power_plant_id = hpp.id
-       AND e.time AT TIME ZONE 'UTC' BETWEEN DATE_TRUNC('day', CURRENT_DATE) AND (DATE_TRUNC('day', CURRENT_DATE) + INTERVAL '1 day' - INTERVAL '1 second')
+       AND e.time BETWEEN DATE_TRUNC('day', CURRENT_DATE) AND (DATE_TRUNC('day', CURRENT_DATE) + INTERVAL '1 day' - INTERVAL '1 second')
        AND ((e.upper_basin >= hpp.upper_basin_max OR e.upper_basin <= hpp.lower_basin_min)
          OR e.lower_basin < hpp.lower_basin_min)
     ) AS today,
@@ -267,7 +270,7 @@ export default class hydroPowerPlantsService extends moleculer.Service {
      SELECT COUNT(*)
      FROM events e
      WHERE e.hydro_power_plant_id = hpp.id
-       AND e.time AT TIME ZONE 'UTC' BETWEEN DATE_TRUNC('day', CURRENT_DATE) - INTERVAL '1 week' AND (DATE_TRUNC('day', CURRENT_DATE) + INTERVAL '1 day' - INTERVAL '1 second')
+       AND e.time BETWEEN DATE_TRUNC('day', CURRENT_DATE) - INTERVAL '1 week' AND (DATE_TRUNC('day', CURRENT_DATE) + INTERVAL '1 day' - INTERVAL '1 second')
        AND ((e.upper_basin >= hpp.upper_basin_max OR e.upper_basin <= hpp.lower_basin_min)
          OR e.lower_basin < hpp.lower_basin_min)
     ) AS week,
@@ -275,7 +278,7 @@ export default class hydroPowerPlantsService extends moleculer.Service {
      SELECT COUNT(*)
      FROM events e
      WHERE e.hydro_power_plant_id = hpp.id
-       AND e.time AT TIME ZONE 'UTC' BETWEEN DATE_TRUNC('day', CURRENT_DATE) - INTERVAL '1 month' AND (DATE_TRUNC('day', CURRENT_DATE) + INTERVAL '1 day' - INTERVAL '1 second')
+       AND e.time BETWEEN DATE_TRUNC('day', CURRENT_DATE) - INTERVAL '1 month' AND (DATE_TRUNC('day', CURRENT_DATE) + INTERVAL '1 day' - INTERVAL '1 second')
        AND ((e.upper_basin >= hpp.upper_basin_max OR e.upper_basin <= hpp.lower_basin_min)
          OR e.lower_basin < hpp.lower_basin_min)
     ) AS month,
@@ -299,10 +302,12 @@ export default class hydroPowerPlantsService extends moleculer.Service {
    ORDER BY name;
      `);
 
-    const hydroIds = rawHydros.rows.map((hydro) => `'${hydro.hydrostatic_id}'`);
+    const hydroIds = rawHydros?.[1]?.rows.map(
+      (hydro: any) => `'${hydro.hydrostatic_id}'`
+    );
     const hydrosFromUETK = await getUETKHydros(hydroIds);
 
-    const mappedHydroPowerPlants = rawHydros.rows.map((hydro) => {
+    const mappedHydroPowerPlants = rawHydros?.[1]?.rows.map((hydro: any) => {
       const UETKHydro = hydrosFromUETK[hydro.hydrostatic_id];
       const {
         upper_basin,
