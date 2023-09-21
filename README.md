@@ -1,26 +1,25 @@
 # BĮIP Hidro API
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/AplinkosMinisterija/biip-hidro-api/badge)](https://securityscorecards.dev/viewer/?platform=github.com&org={AplinkosMinisterija}&repo={biip-hidro-api})
+
 [![License](https://img.shields.io/github/license/AplinkosMinisterija/biip-hidro-api)](https://github.com/AplinkosMinisterija/biip-hidro-api/blob/main/LICENSE)
 [![GitHub issues](https://img.shields.io/github/issues/AplinkosMinisterija/biip-hidro-api)](https://github.com/AplinkosMinisterija/biip-hidro-api/issues)
 [![GitHub stars](https://img.shields.io/github/stars/AplinkosMinisterija/biip-hidro-api)](https://github.com/AplinkosMinisterija/biip-hidro-api/stargazers)
 
 This repository contains the source code and documentation for the BĮIP Hidro API, developed by the Aplinkos
 Ministerija.
+
 ## Table of Contents
 
 - [About the Project](#about-the-project)
 - [Getting Started](#getting-started)
-    - [Installation](#installation)
-    - [Usage](#usage)
-- [OpenAPI](#openapi)
+  - [Installation](#installation)
+  - [Usage](#usage)
 - [Deployment](#deployment)
 - [Contributing](#contributing)
 - [License](#license)
 
-
 ## About the Project
 
-The BĮIP Hidro API is designed to provide information and functionalities related to activities of different water bodies located in Lithuania. It aims to support the management of water bodies.
+The BĮIP Hidro API is designed to provide information and functionalities related to hydro power plants located in Lithuania.
 
 ## Getting Started
 
@@ -42,6 +41,7 @@ To get started with the BĮIP Hidro API, follow the instructions below.
    ```
 
 ### Usage
+
 1. Set up the required environment variables. Copy the `.env.example` file to `.env` and provide the necessary values for the variables.
 
 2. Start the API server:
