@@ -2,14 +2,16 @@
 
 import moleculer, { Context } from 'moleculer';
 import { Action, Service } from 'moleculer-decorators';
+import moment from 'moment';
 import DbConnection from '../mixins/database.mixin';
 import { COMMON_DEFAULT_SCOPES, COMMON_FIELDS, COMMON_SCOPES } from '../types';
 import { Hydro } from './hydroPowerPlants.service';
 const Cron = require('@r2d2bzh/moleculer-cron');
 
-const api = 'https://hidro.lt/api/elektrines/';
+const dayFormat = 'YYYY-MM-DD';
+const apiUrl = 'https://pro.meteo.lt/produktai/he-api';
 
-const MAX_RETRIES = 5;
+const MAX_RETRIES = 1;
 
 export interface Event {
   id?: string;
@@ -45,7 +47,7 @@ export interface Event {
   crons: [
     {
       name: 'setEvents',
-      cronTime: '*/59 * * * *',
+      cronTime: '*/22 * * * *',
       async onTick() {
         return await this.call('events.setEvents');
       },
@@ -98,11 +100,20 @@ export default class eventsService extends moleculer.Service {
     timeout: 0,
   })
   async setEvents(ctx: Context) {
-    const hydroPowerPlants: Hydro[] = await ctx.call('hydroPowerPlants.find', {
-      query: {
-        apiId: { $exists: true },
-      },
-    });
+    const getUrl = (hydroId: string) => {
+      const queryString = `?`;
+      const param = new URLSearchParams();
+
+      param.append('station', hydroId);
+      param.append('date', moment(new Date()).format(dayFormat));
+      param.append('api-key', process.env.API_KEY);
+      return apiUrl + queryString + param;
+    };
+
+    const hydroPowerPlants: Hydro[] = await ctx.call(
+      'hydroPowerPlants.find',
+      {}
+    );
 
     await Promise.all(
       hydroPowerPlants.map(async (hydro) => {
@@ -111,28 +122,30 @@ export default class eventsService extends moleculer.Service {
 
         while (retryCount < MAX_RETRIES && !success) {
           try {
-            const response = await fetch(`${api}${hydro.apiId}?format=json`);
+            const response = await fetch(getUrl(hydro.hydrostaticId));
 
             if (!response.ok) {
               throw new Error(`Fetch failed with status: ${response.status}`);
             }
 
-            const event = (await response.json())?.['vandens_lygiai']?.[0];
+            const event = (await response.json())?.observations?.slice(-1)?.[0];
 
-            if (event?.['laikas']) {
+            if (event) {
+              const { observationTime, upperWaterLevel, lowerWaterLevel } =
+                event;
               const existingEvent = await ctx.call('events.findOne', {
                 query: {
                   hydroPowerPlant: { $eq: hydro.id },
-                  time: { $eq: event?.['laikas'] },
+                  time: { $eq: observationTime },
                 },
               });
 
               if (!existingEvent) {
                 this.createEntity(ctx, {
                   hydroPowerPlant: hydro.id,
-                  time: event['laikas'],
-                  upperBasin: event['aukstutinis_vandens_lygis'],
-                  lowerBasin: event['zemutinis_vandens_lygis'],
+                  time: observationTime,
+                  upperBasin: upperWaterLevel,
+                  lowerBasin: lowerWaterLevel,
                 });
               }
             }
