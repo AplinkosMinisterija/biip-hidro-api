@@ -47,7 +47,7 @@ export interface Event {
   crons: [
     {
       name: 'setEvents',
-      cronTime: '*/22 * * * *',
+      cronTime: '*/30 * * * *',
       async onTick() {
         return await this.call('events.setEvents');
       },
