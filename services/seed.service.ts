@@ -25,7 +25,610 @@ export default class SeedService extends moleculer.Service {
       await this.seedHydroPowerPlants();
     }
 
+    await this.update();
+
     return true;
+  }
+
+  @Method
+  async update() {
+    const data = [
+      {
+        id: '41010850h0001',
+        upperBasinMax: '62.17',
+        upperBasinMin: '60.68',
+        lowerBasinMin: '58.68',
+      },
+      {
+        id: '30011326h0001',
+        upperBasinMax: '136.42',
+        upperBasinMin: '135.78',
+        lowerBasinMin: '131.53',
+      },
+      {
+        id: '13011010h0001',
+        upperBasinMax: '64.52',
+        upperBasinMin: '61.98',
+        lowerBasinMin: '47.23',
+      },
+      {
+        id: '12210050h0001',
+        upperBasinMax: '144.62',
+        upperBasinMin: '142.38',
+        lowerBasinMin: '108.52',
+      },
+      {
+        id: '15010001h0006',
+        upperBasinMax: '51.87',
+        upperBasinMin: '50.94',
+        lowerBasinMin: '45.77',
+      },
+      {
+        id: '10011050h0001',
+        upperBasinMax: '120.52',
+        upperBasinMin: '119.48',
+        lowerBasinMin: '104.33',
+      },
+      {
+        id: '10011370h0002',
+        upperBasinMax: '124.82',
+        upperBasinMin: '123.78',
+        lowerBasinMin: '113.40',
+      },
+      {
+        id: '30010740h0008',
+        upperBasinMax: '84.72',
+        upperBasinMin: '83.13',
+        lowerBasinMin: '79.96',
+      },
+      {
+        id: '16010001h0001',
+        upperBasinMax: '56.52',
+        upperBasinMin: '54.68',
+        lowerBasinMin: '40.50',
+      },
+      {
+        id: '30010740h0001',
+        upperBasinMax: '143.52',
+        upperBasinMin: '142.88',
+        lowerBasinMin: '138.68',
+      },
+      {
+        id: '10010240h0001',
+        upperBasinMax: '100.22',
+        upperBasinMin: '98.88',
+        lowerBasinMin: '87.73',
+      },
+      {
+        id: '12010810h0001',
+        upperBasinMax: '108.90',
+        upperBasinMin: '107.62',
+        lowerBasinMin: '100.14',
+      },
+      {
+        id: '30010740h0004',
+        upperBasinMax: '125.22',
+        upperBasinMin: '124.08',
+        lowerBasinMin: '120.96',
+      },
+      {
+        id: '12110160h0001',
+        upperBasinMax: '139.92',
+        upperBasinMin: '138.98',
+        lowerBasinMin: '135.08',
+      },
+      {
+        id: '10011370h0004',
+        upperBasinMax: '60.22',
+        upperBasinMin: '59.38',
+        lowerBasinMin: '51.98',
+      },
+      {
+        id: '13010770h0002',
+        upperBasinMax: '48.87',
+        upperBasinMin: '47.48',
+        lowerBasinMin: '41.98',
+      },
+      {
+        id: '10010390h0001',
+        upperBasinMax: '91.84',
+        upperBasinMin: '90.68',
+        lowerBasinMin: '86.58',
+      },
+      {
+        id: '41010001h0001',
+        upperBasinMax: '48.67',
+        upperBasinMin: '48.03',
+        lowerBasinMin: '42.52',
+      },
+      {
+        id: '11010320h0001',
+        upperBasinMax: '138.76',
+        upperBasinMin: '137.22',
+        lowerBasinMin: '126.88',
+      },
+      {
+        id: '10011370h0003',
+        upperBasinMax: '95.02',
+        upperBasinMin: '94.53',
+        lowerBasinMin: '84.18',
+      },
+      {
+        id: '12210773h0001',
+        upperBasinMax: '113.59',
+        upperBasinMin: '112.63',
+        lowerBasinMin: '107.08',
+      },
+      {
+        id: '17010240h0001',
+        upperBasinMax: '104.32',
+        upperBasinMin: '103.48',
+        lowerBasinMin: '91.99',
+      },
+      {
+        id: '12010510h0001',
+        upperBasinMax: '94.02',
+        upperBasinMin: '93.28',
+        lowerBasinMin: '89.03',
+      },
+      {
+        id: '30010740h0005',
+        upperBasinMax: '62.04',
+        upperBasinMin: '60.58',
+        lowerBasinMin: '57.58',
+      },
+      {
+        id: '13011036h0001',
+        upperBasinMax: '110.10',
+        upperBasinMin: '107.98',
+        lowerBasinMin: '99.53',
+      },
+      {
+        id: '13011190h0001',
+        upperBasinMax: '45.42',
+        upperBasinMin: '44.20',
+        lowerBasinMin: '33.53',
+      },
+      {
+        id: '30010001h0004',
+        upperBasinMax: '49.12',
+        upperBasinMin: '46.38',
+        lowerBasinMin: '43.56',
+      },
+      {
+        id: '30010740h0003',
+        upperBasinMax: '118.72',
+        upperBasinMin: '117.68',
+        lowerBasinMin: '114.48',
+      },
+      {
+        id: '10011050h0002',
+        upperBasinMax: '59.74',
+        upperBasinMin: '59.08',
+        lowerBasinMin: '53.42',
+      },
+      {
+        id: '30011310h0003',
+        upperBasinMax: '58.42',
+        upperBasinMin: '57.23',
+        lowerBasinMin: '44.23',
+      },
+      {
+        id: '13010770h0001',
+        upperBasinMax: '43.52',
+        upperBasinMin: '41.98',
+        lowerBasinMin: '30.98',
+      },
+      {
+        id: '10012120h0001',
+        upperBasinMax: '26.64',
+        upperBasinMin: '24.58',
+        lowerBasinMin: '15.33',
+      },
+      {
+        id: '12110420h0001',
+        upperBasinMax: '113.22',
+        upperBasinMin: '112.58',
+        lowerBasinMin: '109.05',
+      },
+      {
+        id: '12211010h0001',
+        upperBasinMax: '63.62',
+        upperBasinMin: '61.93',
+        lowerBasinMin: '57.08',
+      },
+      {
+        id: '30010740h0006',
+        upperBasinMax: '76.52',
+        upperBasinMin: '76.08',
+        lowerBasinMin: '71.98',
+      },
+      {
+        id: '10010263h0001',
+        upperBasinMax: '111.32',
+        upperBasinMin: '110.68',
+        lowerBasinMin: '105.68',
+      },
+      {
+        id: '30010740h0009',
+        upperBasinMax: '69.72',
+        upperBasinMin: '69.18',
+        lowerBasinMin: '64.73',
+      },
+      {
+        id: '14010350h0001',
+        upperBasinMax: '94.68',
+        upperBasinMin: '93.12',
+        lowerBasinMin: '77.35',
+      },
+      {
+        id: '10010001h0001',
+        upperBasinMax: '45.62',
+        upperBasinMin: '39.98',
+        lowerBasinMin: '23.57',
+      },
+      {
+        id: '12210001h0002',
+        upperBasinMax: '64.32',
+        upperBasinMin: '61.32',
+        lowerBasinMin: '56.58',
+      },
+      {
+        id: '14010160h0009',
+        upperBasinMax: '114.01',
+        upperBasinMin: '113.03',
+        lowerBasinMin: '110.38',
+      },
+      {
+        id: '80012080h0001',
+        upperBasinMax: '32.57',
+        upperBasinMin: '30.88',
+        lowerBasinMin: '23.58',
+      },
+      {
+        id: '30011181h0004',
+        upperBasinMax: '70.25',
+        upperBasinMin: '68.88',
+        lowerBasinMin: '62.95',
+      },
+      {
+        id: '11010320h0002',
+        upperBasinMax: '125.42',
+        upperBasinMin: '123.88',
+        lowerBasinMin: '117.62',
+      },
+      {
+        id: '30011310h0001',
+        upperBasinMax: '106.17',
+        upperBasinMin: '105.13',
+        lowerBasinMin: '101.88',
+      },
+      {
+        id: '30010001h0005',
+        upperBasinMax: '45.22',
+        upperBasinMin: '43.88',
+        lowerBasinMin: '39.53',
+      },
+      {
+        id: '13010940h0001',
+        upperBasinMax: '41.29',
+        upperBasinMin: '39.68',
+        lowerBasinMin: '29.28',
+      },
+      {
+        id: '15010001h0002',
+        upperBasinMax: '99.52',
+        upperBasinMin: '99.08',
+        lowerBasinMin: '95.63',
+      },
+      {
+        id: '30011236h0001',
+        upperBasinMax: '50.72',
+        upperBasinMin: '49.88',
+        lowerBasinMin: '42.48',
+      },
+      {
+        id: '12010591h0001',
+        upperBasinMax: '129.02',
+        upperBasinMin: '128.88',
+        lowerBasinMin: '123.01',
+      },
+      {
+        id: '12010340h0003',
+        upperBasinMax: '126.02',
+        upperBasinMin: '125.28',
+        lowerBasinMin: '121.28',
+      },
+      {
+        id: '15010001h0001',
+        upperBasinMax: '75.64',
+        upperBasinMin: '74.23',
+        lowerBasinMin: '70.98',
+      },
+      {
+        id: '15010001h0003',
+        upperBasinMax: '62.22',
+        upperBasinMin: '61.68',
+        lowerBasinMin: '58.83',
+      },
+      {
+        id: '15010001h0004',
+        upperBasinMax: '70.97',
+        upperBasinMin: '69.48',
+        lowerBasinMin: '61.73',
+      },
+      {
+        id: '12211210h0002',
+        upperBasinMax: '116.02',
+        upperBasinMin: '114.98',
+        lowerBasinMin: '109.08',
+      },
+      {
+        id: '12010510h0002',
+        upperBasinMax: '114.02',
+        upperBasinMin: '113.28',
+        lowerBasinMin: '106.68',
+      },
+      {
+        id: '15010190h0001',
+        upperBasinMax: '76.12',
+        upperBasinMin: '75.48',
+        lowerBasinMin: '70.63',
+      },
+      {
+        id: '12110320h0001',
+        upperBasinMax: '129.27',
+        upperBasinMin: '128.48',
+        lowerBasinMin: '118.53',
+      },
+      {
+        id: '12110320h0002',
+        upperBasinMax: '129.27',
+        upperBasinMin: '128.48',
+        lowerBasinMin: '118.53',
+      },
+      {
+        id: '50010001h0001',
+        upperBasinMax: '144.74',
+        upperBasinMin: '144.36',
+        lowerBasinMin: '139.68',
+      },
+      {
+        id: '14010230h0005',
+        upperBasinMax: '115.82',
+        upperBasinMin: '114.88',
+        lowerBasinMin: '108.63',
+      },
+      {
+        id: '10011510h0001',
+        upperBasinMax: '56.77',
+        upperBasinMin: '55.23',
+        lowerBasinMin: '48.08',
+      },
+      {
+        id: '11010434h0001',
+        upperBasinMax: '119.52',
+        upperBasinMin: '119.38',
+        lowerBasinMin: '115.53',
+      },
+      {
+        id: '10011407h0001',
+        upperBasinMax: '80.62',
+        upperBasinMin: '80.08',
+        lowerBasinMin: '68.93',
+      },
+      {
+        id: '15010001h0007',
+        upperBasinMax: '42.17',
+        upperBasinMin: '40.68',
+        lowerBasinMin: '37.68',
+      },
+      {
+        id: '14010530h0001',
+        upperBasinMax: '56.02',
+        upperBasinMin: '54.48',
+        lowerBasinMin: '39.28',
+      },
+      {
+        id: '17010240h0002',
+        upperBasinMax: '109.01',
+        upperBasinMin: '108.08',
+        lowerBasinMin: '104.58',
+      },
+      {
+        id: '80012010h0002',
+        upperBasinMax: '29.35',
+        upperBasinMin: '28.38',
+        lowerBasinMin: '23.08',
+      },
+      {
+        id: '15010001h0005',
+        upperBasinMax: '55.49',
+        upperBasinMin: '54.68',
+        lowerBasinMin: '51.83',
+      },
+      {
+        id: '30010740h0007',
+        upperBasinMax: '80.62',
+        upperBasinMin: '79.68',
+        lowerBasinMin: '75.88',
+      },
+      {
+        id: '17011060h0003',
+        upperBasinMax: '20.14',
+        upperBasinMin: '18.98',
+        lowerBasinMin: '11.93',
+      },
+      {
+        id: '30011310h0002',
+        upperBasinMax: '89.37',
+        upperBasinMin: '88.12',
+        lowerBasinMin: '82.93',
+      },
+      {
+        id: '12010420h0001',
+        upperBasinMax: '135.50',
+        upperBasinMin: '134.98',
+        lowerBasinMin: '130.98',
+      },
+      {
+        id: '30010001h0001',
+        upperBasinMax: '83.62',
+        upperBasinMin: '81.38',
+        lowerBasinMin: '79.23',
+      },
+      {
+        id: '30010610h0001',
+        upperBasinMax: '69.52',
+        upperBasinMin: '68.78',
+        lowerBasinMin: '64.03',
+      },
+      {
+        id: '10011370h0001',
+        upperBasinMax: '107.52',
+        upperBasinMin: '107.19',
+        lowerBasinMin: '104.58',
+      },
+      {
+        id: '30010740h0010',
+        upperBasinMax: '65.52',
+        upperBasinMin: '64.58',
+        lowerBasinMin: '60.98',
+      },
+      {
+        id: '80012010h0001',
+        upperBasinMax: '25.06',
+        upperBasinMin: '23.18',
+        lowerBasinMin: '15.18',
+      },
+      {
+        id: '12210750h0001',
+        upperBasinMax: '133.47',
+        upperBasinMin: '133.28',
+        lowerBasinMin: '130.61',
+      },
+      {
+        id: '41010923h0001',
+        upperBasinMax: '83.62',
+        upperBasinMin: '82.43',
+        lowerBasinMin: '71.99',
+      },
+      {
+        id: '30010740h0002',
+        upperBasinMax: '88.22',
+        upperBasinMin: '88.00',
+        lowerBasinMin: '84.83',
+      },
+      {
+        id: '12210750h0002',
+        upperBasinMax: '128.67',
+        upperBasinMin: '128.38',
+        lowerBasinMin: '124.08',
+      },
+      {
+        id: '30011090h0001',
+        upperBasinMax: '80.87',
+        upperBasinMin: '79.88',
+        lowerBasinMin: '75.08',
+      },
+      {
+        id: '12211210h0001',
+        upperBasinMax: '110.01',
+        upperBasinMin: '109.47',
+        lowerBasinMin: '104.87',
+      },
+      {
+        id: '12110160h0002',
+        upperBasinMax: '147.02',
+        upperBasinMin: '146.68',
+        lowerBasinMin: '142.98',
+      },
+      {
+        id: '30010740h0033',
+        upperBasinMax: '91.68',
+        upperBasinMin: '90.58',
+        lowerBasinMin: '87.53',
+      },
+      {
+        id: '20010410h0011',
+        upperBasinMax: '29.08',
+        upperBasinMin: '27.28',
+        lowerBasinMin: '19.99',
+      },
+      {
+        id: '30010825h0001',
+        upperBasinMax: '109.12',
+        upperBasinMin: '108.58',
+        lowerBasinMin: '99.08',
+      },
+      {
+        id: '30011310h0004',
+        upperBasinMax: '66.17',
+        upperBasinMin: '64.88',
+        lowerBasinMin: '61.48',
+      },
+      { id: '10011370h0005' },
+      {
+        id: '12210001h0001',
+        upperBasinMax: '92.22',
+        upperBasinMin: '91.88',
+        lowerBasinMin: '89.18',
+      },
+      {
+        id: '30010001h0002',
+        upperBasinMax: '118.32',
+        upperBasinMin: '116.78',
+        lowerBasinMin: '113.99',
+      },
+      {
+        id: '30011310h0005',
+        upperBasinMax: '79.17',
+        upperBasinMin: '77.88',
+        lowerBasinMin: '74.48',
+      },
+      {
+        id: '13011010h0002',
+        upperBasinMax: '96.72',
+        upperBasinMin: '95.48',
+        lowerBasinMin: '84.98',
+      },
+      { id: '12210920h0001', upperBasinMax: '72.52', upperBasinMin: '71.59' },
+      {
+        id: '11010420h0001',
+        upperBasinMax: '107.54',
+        upperBasinMin: '106.33',
+        lowerBasinMin: '100.53',
+      },
+      {
+        id: '30010001h0003',
+        upperBasinMax: '56.87',
+        upperBasinMin: '54.28',
+        lowerBasinMin: '50.93',
+      },
+      {
+        id: '42010110h0001',
+        upperBasinMax: '96.51',
+        upperBasinMin: '95.88',
+        lowerBasinMin: '88.89',
+      },
+    ];
+
+    return await Promise.all(
+      data.map(async (data) => {
+        const { id, ...rest } = data;
+        const item: Hydro = await this.broker.call('hydroPowerPlants.findOne', {
+          query: {
+            hydrostaticId: data.id,
+          },
+        });
+        if (!!item) {
+          await this.broker.call('hydroPowerPlants.update', {
+            id: item.id,
+            ...rest,
+          });
+        }
+      })
+    );
   }
 
   @Method
