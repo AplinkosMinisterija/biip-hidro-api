@@ -191,21 +191,33 @@ export default class hydroPowerPlantsService extends moleculer.Service {
       };
     });
 
-    const hydrosWithEvents = await Promise.all(
-      mappedHydroPowerPlants.map(async (hydro) => {
-        const events: Event[] = await ctx.call('events.find', {
-          query: {
-            hydroPowerPlant: {
-              $eq: hydro.id,
-            },
-            time,
-          },
-          sort: 'time',
-        });
+    const events: Event[] = await ctx.call('events.find', {
+      query: {
+        hydroPowerPlant: {
+          $in: mappedHydroPowerPlants.map((hydro) => hydro.id),
+        },
+        time,
+      },
+      sort: 'time',
+    });
 
-        return { ...hydro, events };
-      })
+    const hydroEventsMap = events.reduce(
+      (acc: { [key: string]: Event[] }, event: Event) => {
+        if (!acc[event.hydroPowerPlant]) {
+          acc[event.hydroPowerPlant] = [];
+        }
+        acc[event.hydroPowerPlant].push(event);
+        return acc;
+      },
+      {}
     );
+
+    const hydrosWithEvents = mappedHydroPowerPlants.map((hydro) => {
+      return {
+        ...hydro,
+        events: hydroEventsMap[hydro.id] || [],
+      };
+    });
 
     return hydrosWithEvents;
   }
