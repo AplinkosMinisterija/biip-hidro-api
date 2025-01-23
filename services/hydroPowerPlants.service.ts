@@ -8,6 +8,8 @@ import { Event } from './events.service';
 const qgisServerHost = process.env.QGIS_SERVER_HOST || 'https://gis.biip.lt';
 const gisApiUrl = `${qgisServerHost}/qgisserver/uetk_public`;
 
+export const statisticsMaterializedView = 'hydro_power_plant_statistics';
+
 export interface Hydro {
   id?: string;
   hydrostaticId: string;
@@ -170,6 +172,15 @@ const getUETKHydros = async (ids: string[]) => {
 export default class hydroPowerPlantsService extends moleculer.Service {
   @Action({
     rest: 'GET /map',
+    params: {
+      time: {
+        type: 'object',
+        props: {
+          $gte: { type: 'string' },
+          $lt: { type: 'string' },
+        },
+      },
+    },
   })
   async getHydroPowerPlants(ctx: Context<{ query: Range }>) {
     const { time } = ctx.params.query;
@@ -259,87 +270,20 @@ export default class hydroPowerPlantsService extends moleculer.Service {
     ctx: Context<{ query: { dateFrom: string; dateTo: string } }>
   ) {
     const adapter = await this.getAdapter(ctx);
-    const rawHydros: any = await adapter.client.raw(`
-    SET TIME ZONE 'Europe/Vilnius';
+    const statistics = await adapter.client(statisticsMaterializedView);
 
-      
-      SELECT  
-    hpp.id,
-    hpp.hydrostatic_id,
-    hpp."name",
-    hpp.upper_basin_max,
-    hpp.upper_basin_min,
-    hpp.lower_basin_min,
-    (
-     SELECT COUNT(*)
-     FROM events e
-     WHERE e.hydro_power_plant_id = hpp.id
-       AND e.time BETWEEN DATE_TRUNC('day', CURRENT_DATE) AND (DATE_TRUNC('day', CURRENT_DATE) + INTERVAL '1 day' - INTERVAL '1 second')
-       AND ((e.upper_basin NOT BETWEEN hpp.upper_basin_min AND hpp.upper_basin_max)
-       OR e.lower_basin < hpp.lower_basin_min)
-    ) AS today,
-    (
-     SELECT COUNT(*)
-     FROM events e
-     WHERE e.hydro_power_plant_id = hpp.id
-       AND e.time BETWEEN DATE_TRUNC('day', CURRENT_DATE) - INTERVAL '1 week' AND (DATE_TRUNC('day', CURRENT_DATE) + INTERVAL '1 day' - INTERVAL '1 second')
-       AND ((e.upper_basin NOT BETWEEN hpp.upper_basin_min AND hpp.upper_basin_max)
-       OR e.lower_basin < hpp.lower_basin_min)
-    ) AS week,
-    (
-     SELECT COUNT(*)
-     FROM events e
-     WHERE e.hydro_power_plant_id = hpp.id
-       AND e.time BETWEEN DATE_TRUNC('day', CURRENT_DATE) - INTERVAL '1 month' AND (DATE_TRUNC('day', CURRENT_DATE) + INTERVAL '1 day' - INTERVAL '1 second')
-       AND ((e.upper_basin NOT BETWEEN hpp.upper_basin_min AND hpp.upper_basin_max)
-       OR e.lower_basin < hpp.lower_basin_min)
-    ) AS month,
-    (
-  SELECT e.upper_basin 
-  FROM events e 
-  WHERE e.hydro_power_plant_id = hpp.id
-  
-  ORDER BY id DESC 
-  limit 1
- ),
-  (
-  SELECT e.lower_basin 
-  FROM events e 
-  WHERE e.hydro_power_plant_id = hpp.id
-  ORDER BY id DESC 
-  limit 1
-    )
-   FROM hydro_power_plants hpp
-   LEFT JOIN events e ON hpp.id = e.hydro_power_plant_id
-   GROUP BY hpp.id, hpp."name", hpp.upper_basin_max, hpp.upper_basin_min, hpp.lower_basin_min
-   ORDER BY name;
-     `);
-
-    const hydroIds = rawHydros?.[1]?.rows.map(
-      (hydro: any) => `'${hydro.hydrostatic_id}'`
+    const hydroIds = statistics?.map(
+      (hydro: any) => `'${hydro.hydrostaticId}'`
     );
     const hydrosFromUETK = await getUETKHydros(hydroIds);
 
-    const mappedHydroPowerPlants = rawHydros?.[1]?.rows.map((hydro: any) => {
-      const UETKHydro = hydrosFromUETK[hydro.hydrostatic_id];
-      const {
-        upper_basin,
-        upper_basin_max,
-        upper_basin_min,
-        lower_basin,
-        lower_basin_min,
-        ...rest
-      } = hydro;
+    const mappedHydroPowerPlants = statistics?.map((hydroInfo: any) => {
+      const UETKHydro = hydrosFromUETK[hydroInfo.hydrostaticId];
 
       const { name } = UETKHydro;
 
       return {
-        ...rest,
-        upperBasin: upper_basin,
-        upperBasinMin: upper_basin_min,
-        lowerBasinMin: lower_basin_min,
-        lowerBasin: lower_basin,
-        upperBasinMax: upper_basin_max,
+        ...hydroInfo,
         name,
       };
     });

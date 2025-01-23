@@ -5,7 +5,7 @@ import { Action, Service } from 'moleculer-decorators';
 import moment from 'moment';
 import DbConnection from '../mixins/database.mixin';
 import { COMMON_DEFAULT_SCOPES, COMMON_FIELDS, COMMON_SCOPES } from '../types';
-import { Hydro } from './hydroPowerPlants.service';
+import { Hydro, statisticsMaterializedView } from './hydroPowerPlants.service';
 const Cron = require('@r2d2bzh/moleculer-cron');
 
 const dayFormat = 'YYYY-MM-DD';
@@ -162,6 +162,12 @@ export default class eventsService extends moleculer.Service {
           }
         }
       })
+    );
+
+    const adapter = await this.getAdapter(ctx);
+
+    await adapter.client.schema.refreshMaterializedView(
+      statisticsMaterializedView
     );
 
     return 'ok';
