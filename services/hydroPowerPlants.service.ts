@@ -173,11 +173,16 @@ export default class hydroPowerPlantsService extends moleculer.Service {
   @Action({
     rest: 'GET /map',
     params: {
-      time: {
+      query: {
         type: 'object',
-        props: {
-          $gte: { type: 'string' },
-          $lt: { type: 'string' },
+        properties: {
+          time: {
+            type: 'object',
+            properties: {
+              $gte: { type: 'string' },
+              $lt: { type: 'string' },
+            },
+          },
         },
       },
     },
