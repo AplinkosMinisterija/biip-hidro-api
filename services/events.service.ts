@@ -105,7 +105,7 @@ export default class eventsService extends moleculer.Service {
       const param = new URLSearchParams();
 
       param.append('station', hydroId);
-      param.append('date', moment(new Date()).format(dayFormat));
+      param.append('date', moment.utc().format(dayFormat)); // UTC data
       param.append('api-key', process.env.API_KEY);
       return apiUrl + queryString + param;
     };
@@ -131,24 +131,28 @@ export default class eventsService extends moleculer.Service {
             const event = (await response.json())?.observations
               ?.filter(
                 (item: any) =>
-                  !!item?.upperWaterLevel && !!item?.lowerWaterLevel
+                  typeof item?.upperWaterLevel === 'number' &&
+                  typeof item?.lowerWaterLevel === 'number'
               )
               .slice(-1)?.[0];
 
             if (event) {
               const { observationTime, upperWaterLevel, lowerWaterLevel } =
                 event;
+
+              const eventTimeUTC = moment.utc(observationTime).toDate();
+
               const existingEvent = await ctx.call('events.findOne', {
                 query: {
                   hydroPowerPlant: { $eq: hydro.id },
-                  time: { $eq: observationTime },
+                  time: { $eq: eventTimeUTC },
                 },
               });
 
               if (!existingEvent) {
                 this.createEntity(ctx, {
                   hydroPowerPlant: hydro.id,
-                  time: observationTime,
+                  time: eventTimeUTC,
                   upperBasin: upperWaterLevel,
                   lowerBasin: lowerWaterLevel,
                 });
