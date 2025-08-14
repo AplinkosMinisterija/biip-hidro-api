@@ -150,7 +150,7 @@ export default class eventsService extends moleculer.Service {
               });
 
               if (!existingEvent) {
-                this.createEntity(ctx, {
+                await this.createEntity(ctx, {
                   hydroPowerPlant: hydro.id,
                   time: eventTimeUTC,
                   upperBasin: upperWaterLevel,
