@@ -131,7 +131,7 @@ export default class eventsService extends moleculer.Service {
 
                 const eventTimeUTC = moment.utc(observationTime).toDate();
 
-                const existingEvent = await ctx.call('events.findOne', {
+                const existingEvent: Event = await ctx.call('events.findOne', {
                   query: {
                     hydroPowerPlant: { $eq: hydro.id },
                     time: { $eq: eventTimeUTC },
@@ -147,7 +147,7 @@ export default class eventsService extends moleculer.Service {
                   });
                 } else {
                   await this.updateEntity(ctx, {
-                    id: hydro.id,
+                    id: existingEvent.id,
                     upperBasin: upperWaterLevel,
                     lowerBasin: lowerWaterLevel,
                   });
