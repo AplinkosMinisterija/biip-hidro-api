@@ -73,17 +73,8 @@ export interface Event {
         columnName: 'hydroPowerPlantId',
         populate: 'hydroPowerPlants.resolve',
       },
-      upperBasin: {
-        type: 'number',
-        columnType: 'decimal',
-        columnName: 'upperBasin',
-      },
-
-      lowerBasin: {
-        type: 'number',
-        columnType: 'decimal',
-        columnName: 'lowerBasin',
-      },
+      upperBasin: 'number',
+      lowerBasin: 'number',
 
       ...COMMON_FIELDS,
     },
@@ -114,7 +105,6 @@ export default class eventsService extends moleculer.Service {
       'hydroPowerPlants.find',
       {}
     );
-
     await Promise.all(
       hydroPowerPlants.map(async (hydro) => {
         let retryCount = 0;
@@ -128,34 +118,34 @@ export default class eventsService extends moleculer.Service {
               throw new Error(`Fetch failed with status: ${response.status}`);
             }
 
-            const event = (await response.json())?.observations
-              ?.filter(
-                (item: any) =>
-                  typeof item?.upperWaterLevel === 'number' &&
-                  typeof item?.lowerWaterLevel === 'number'
-              )
-              .slice(-1)?.[0];
+            const events = (await response.json())?.observations?.filter(
+              (item: any) =>
+                typeof item?.upperWaterLevel === 'number' &&
+                typeof item?.lowerWaterLevel === 'number'
+            );
 
-            if (event) {
-              const { observationTime, upperWaterLevel, lowerWaterLevel } =
-                event;
+            if (Array.isArray(events) && events.length > 0) {
+              for (const ev of events) {
+                const { observationTime, upperWaterLevel, lowerWaterLevel } =
+                  ev;
 
-              const eventTimeUTC = moment.utc(observationTime).toDate();
+                const eventTimeUTC = moment.utc(observationTime).toDate();
 
-              const existingEvent = await ctx.call('events.findOne', {
-                query: {
-                  hydroPowerPlant: { $eq: hydro.id },
-                  time: { $eq: eventTimeUTC },
-                },
-              });
-
-              if (!existingEvent) {
-                await this.createEntity(ctx, {
-                  hydroPowerPlant: hydro.id,
-                  time: eventTimeUTC,
-                  upperBasin: upperWaterLevel,
-                  lowerBasin: lowerWaterLevel,
+                const existingEvent = await ctx.call('events.findOne', {
+                  query: {
+                    hydroPowerPlant: { $eq: hydro.id },
+                    time: { $eq: eventTimeUTC },
+                  },
                 });
+
+                if (!existingEvent) {
+                  await this.createEntity(ctx, {
+                    hydroPowerPlant: hydro.id,
+                    time: eventTimeUTC,
+                    upperBasin: upperWaterLevel,
+                    lowerBasin: lowerWaterLevel,
+                  });
+                }
               }
             }
 
