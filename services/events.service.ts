@@ -145,6 +145,12 @@ export default class eventsService extends moleculer.Service {
                     upperBasin: upperWaterLevel,
                     lowerBasin: lowerWaterLevel,
                   });
+                } else {
+                  await this.updateEntity(ctx, {
+                    id: hydro.id,
+                    upperBasin: upperWaterLevel,
+                    lowerBasin: lowerWaterLevel,
+                  });
                 }
               }
             }
